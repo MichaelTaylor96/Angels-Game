@@ -40,8 +40,11 @@ class Player(pygame.sprite.Sprite):
             self.rect.left = 0
         if self.rect.right > 480:
             self.rect.right = 480
-        if keystate[pygame.K_LEFT] and self.rect.left > 0:
-            self.xaccel = -1
+        if keystate[pygame.K_LEFT]:
+            if self.rect.bottom == 590 and self.rect.left > 0:
+                self.xaccel = -1
+            else:
+                self.image = pygame.transform.rotate(self.image, 1)
         elif keystate[pygame.K_RIGHT] and self.rect.right < 480:
             self.xaccel = 1
         else:
@@ -68,8 +71,9 @@ class Player(pygame.sprite.Sprite):
 class Mob(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.Surface((10, 10))
-        self.image.fill(RED)
+        self.og_image = pygame.image.load("img/p1_jump.png").convert()
+        self.image = self.og_image
+        self.angle = 0
         self.rect = self.image.get_rect()
         self.rect.x = random.randrange(WIDTH - self.rect.width)
         self.rect.y = 530
@@ -79,6 +83,8 @@ class Mob(pygame.sprite.Sprite):
     def update(self):
         self.rect.y += self.yspeed
         self.yspeed += self.yaccel
+        self.image = pygame.transform.rotate(self.og_image, self.angle)
+        self.angle += 1 % 360
         if self.yspeed <= -3:
             self.yaccel = 0
 
