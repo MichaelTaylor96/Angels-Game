@@ -51,6 +51,32 @@ class Player {
     }
 }
 
+class Angel {
+    constructor(sprite) {
+        this.sprite = sprite;
+        this.body = sprite.body;
+        this.sprite.setAccelerationY(-2000)
+        this.body.mass = 0;
+        this.TOPSPEED = -1500;
+        this.ACCELERATION = (-1*(GRAVITY))-100;
+    }
+
+    update() {
+        if (this.body.velocity.y > this.TOPSPEED) {
+            this.sprite.setAccelerationY(this.ACCELERATION);
+        } else {
+            this.sprite.setVelocityY(this.TOPSPEED)
+        };
+
+        if (this.body.y < -200) this.destroy();
+    }
+
+    destroy() {
+        angels.splice(angels.indexOf(this), 1);
+        this.sprite.destroy();
+    }
+}
+
 var config = {
     type: Phaser.AUTO,
     width: 800,
@@ -70,24 +96,39 @@ var config = {
 };
 
 var game = new Phaser.Game(config);
+const SPAWNRATE = 3;
 var player;
+var angels;
+var seconds;
 var cursors;
 
 function preload ()
 {
     this.load.setBaseURL('img/');
     this.load.image('guy', 'AngelsGuy.png');
+    this.load.image('angel', 'angel.png')
 }
 
 function create ()
 {
-    player = new Player(this.physics.add.image(400, 100, 'guy').setScale(2));
+    player = new Player(this.physics.add.image(400, 780, 'guy').setScale(2));
+    angels = [];
     cursors = this.input.keyboard.createCursorKeys();
-
     player.body.collideWorldBounds = true;
 }
 
 function update ()
 {
+    if (Math.floor(this.time.now/1000) !== seconds) {
+        if (seconds % SPAWNRATE === 0) {
+            var x = Math.random() * 750;
+            var angel = this.physics.add.image(x, 600, 'angel').setScale(.75);
+            angels.push(new Angel(angel));
+        }
+        seconds = Math.floor(this.time.now/1000);
+    }
+    for (var angel of angels) {
+        angel.update();
+    }
     player.update(cursors);
 }
